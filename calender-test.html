@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calendar Test Runner</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background: #f9f9f9; }
+        .test-card { padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid; }
+        .pass { background: #e6f4ea; border-color: #137333; color: #137333; }
+        .fail { background: #fce8e6; border-color: #c5221f; color: #c5221f; }
+        h1 { color: #333; }
+        #summary { font-weight: bold; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Calendar Logic Test Results</h1>
+    <div id="summary">Running tests...</div>
+    <div id="results"></div>
+
+    <script>
+        // --- 1. The Calendar Functions to Test ---
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function getDaysInMonth(year, month) {
+            if (month < 1 || month > 12) throw new Error("Invalid month");
+            return new Date(year, month, 0).getDate();
+        }
+
+        // --- 2. Simple Test Runner Framework ---
+        const resultsContainer = document.getElementById('results');
+        const summaryContainer = document.getElementById('summary');
+        let passedCount = 0;
+        let totalCount = 0;
+
+        function assert(condition, message) {
+            totalCount++;
+            const card = document.createElement('div');
+            card.className = 'test-card ' + (condition ? 'pass' : 'fail');
+            card.textContent = `${condition ? '✓ PASS' : '✗ FAIL'}: ${message}`;
+            resultsContainer.appendChild(card);
+            if (condition) passedCount++;
+        }
+
+        // --- 3. Execute the Tests ---
+        try {
+            // Leap Year Tests
+            assert(isLeapYear(2024) === true, "2024 should be a leap year");
+            assert(isLeapYear(2000) === true, "2000 (century) should be a leap year");
+            assert(isLeapYear(2023) === false, "2023 should NOT be a leap year");
+            assert(isLeapYear(1900) === false, "1900 (century) should NOT be a leap year");
+
+            // Days in Month Tests
+            assert(getDaysInMonth(2026, 1) === 31, "January 2026 should have 31 days");
+            assert(getDaysInMonth(2026, 4) === 30, "April 2026 should have 30 days");
+            assert(getDaysInMonth(2024, 2) === 29, "February 2024 (Leap) should have 29 days");
+            assert(getDaysInMonth(2026, 2) === 28, "February 2026 (Non-Leap) should have 28 days");
+
+            // Error Handling Test
+            let errorThrown = false;
+            try { getDaysInMonth(2026, 13); } catch(e) { errorThrown = true; }
+            assert(errorThrown === true, "Month 13 should throw an error");
+
+        } catch (globalError) {
+            console.error("Test execution broken:", globalError);
+        }
+
+        // Update Summary
+        summaryContainer.textContent = `Result: ${passedCount} / ${totalCount} tests passed.`;
+    </script>
+</body>
+</html>
